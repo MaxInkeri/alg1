@@ -10,18 +10,18 @@ class List
 private:
 	struct elem {
 		int value = 0;
-		elem* prev = nullptr;
-		elem* next = nullptr;
+		elem* prev = nullptr; // previous element
+		elem* next = nullptr; // next element
 	};
 
-	elem* first = nullptr;
-	elem* last = nullptr;
-	elem* curr = nullptr;
-	size_t size = 0;
+	elem* first = nullptr; // first element
+	elem* last = nullptr; // last element
+	elem* curr = nullptr; // current element
+	size_t size = 0; // number of elements in list
 
 	// go to element with specific index and set it as current
 	void go_to_elem(size_t index) {
-		if (index >= size) {
+		if (index >= size) { // exception
 			throw out_of_range("Index is out of range");
 		}
 		else if (index <= size / 2) { // index is closer to the beginning of list
@@ -113,7 +113,13 @@ public:
 	void push_back(int val) {
 		curr = new elem;
 		curr->value = val;
-		last->next = curr;
+		if (size == 0) { // if list was empty
+			first = curr; // that's the only element
+		}
+		else {
+			last->next = curr;
+			curr->prev = last;
+		}
 		last = curr;
 		size++;
 	}
@@ -122,8 +128,13 @@ public:
 	void push_front(int val) {
 		curr = new elem;
 		curr->value = val;
-		first->prev = curr;
-		curr->next = first;
+		if (size == 0) { // if list was empty
+			last = curr; // that's the only element
+		}
+		else {
+			first->prev = curr;
+			curr->next = first;
+		}
 		first = curr;
 		size++;
 	}
@@ -134,6 +145,7 @@ public:
 		int val = last->value;
 		last = last->prev;
 		last->next = nullptr;
+		size--;
 		return val;
 	}
 
@@ -143,11 +155,12 @@ public:
 		int val = first->value;
 		first = first->next;
 		first->prev = nullptr;
+		size--;
 		return val;
 	}
 
 	// insert new element at specific index
-	void insert(int val, size_t index) {
+	void insert(size_t index, int val) {
 		if (index == 0) {
 			push_front(val);
 		}
@@ -163,6 +176,7 @@ public:
 			curr->prev->next = newElem;
 			curr->prev = newElem;
 			curr = newElem;
+			size++;
 		}
 	}
 
@@ -182,6 +196,11 @@ public:
 		size--;
 		curr = first;
 		return val;
+	}
+
+	// get number of elements in list
+	size_t get_size() {
+		return size;
 	}
 	
 	// remove all elements
