@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <cstdarg>
-#include <initializer_list>
 
 using namespace std;
 
@@ -47,7 +46,7 @@ private:
 
 public:
 	// vector of int
-	List(vector<int> numbers) {
+	/*List(vector<int> numbers) {
 		if (!numbers.empty()) {
 			first = new elem;
 			first->value = numbers[0];
@@ -63,16 +62,30 @@ public:
 			curr = first;
 			size = numbers.size();
 		}
-	}
+	}*/
 
 	// pointer array of int and its size
-	List(int* numbers, size_t count) : List(vector<int>(numbers, numbers + count)) {
-		// process like vector
+	List(int* numbers, size_t count) : List(initializer_list<int>(numbers, numbers + count)) {
+		// process like initializer list
 	}
 
 	// initializer list of int
-	List(initializer_list<int> numbers) : List(vector<int>(numbers)) {
-		// process like vector
+	List(initializer_list<int> numbers) {
+		if (numbers.size() != 0) {
+			first = new elem;
+			first->value = *numbers.begin();
+			elem* prev = first;
+			for (unsigned i = 1; i < numbers.size(); i++) {
+				curr = new elem;
+				curr->value = *(numbers.begin() + i);
+				curr->prev = prev;
+				prev->next = curr;
+				prev = curr;
+			}
+			last = prev;
+			curr = first;
+			size = numbers.size();
+		}
 	}
 
 	// first count of int, then numbers separated by commas
