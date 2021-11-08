@@ -6,8 +6,8 @@ using namespace std;
 
 int main()
 {
-    List list(4, 12, 12, 23, 3);
-    cout << "\nList list(4, 12, 12, 23, 3) -> " << list;
+    List list(12, 12, 23, 3);
+    cout << "\nList list(12, 12, 23, 3) -> " << list;
     list.push_back(3);
     cout << "\nlist.push_back(3) -> " << list;
     list.insert(2, 2001);

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <cstdarg>
+#include <utility>
 
 using namespace std;
 
@@ -15,11 +15,11 @@ private:
 
 	elem* first = nullptr; // first element
 	elem* last = nullptr; // last element
-	elem* curr = nullptr; // current element
 	size_t size = 0; // number of elements in list
 
 	// go to element with specific index and set it as current
-	void go_to_elem(size_t index) {
+	elem* go_to_elem(size_t index) {
+		elem* curr = nullptr; // current element
 		if (index >= size) { // exception
 			throw out_of_range("Index is out of range");
 		}
@@ -35,6 +35,7 @@ private:
 				curr = curr->prev;
 			}
 		}
+		return curr;
 	}
 
 	// throw exception if list is empty (e.g. when trying to remove element)
@@ -44,72 +45,36 @@ private:
 		}
 	}
 
+	// integers separated by commas processor
+	template<typename... IntList>
+	void construct_args(int first_number, IntList... numbers) {
+		push_back(first_number);
+		construct_args(numbers...);
+	}
+
+	// integers separated by commas processor - when the last one remain
+	void construct_args(int last_number) {
+		push_back(last_number);
+	}
+
 public:
-	// vector of int
-	/*List(vector<int> numbers) {
-		if (!numbers.empty()) {
-			first = new elem;
-			first->value = numbers[0];
-			elem* prev = first;
-			for (unsigned i = 1; i < numbers.size(); i++) {
-				curr = new elem;
-				curr->value = numbers[i];
-				curr->prev = prev;
-				prev->next = curr;
-				prev = curr;
-			}
-			last = prev;
-			curr = first;
-			size = numbers.size();
-		}
-	}*/
 
 	// pointer array of int and its size
-	List(int* numbers, size_t count) : List(initializer_list<int>(numbers, numbers + count)) {
-		// process like initializer list
-	}
-
-	// initializer list of int
-	List(initializer_list<int> numbers) {
-		if (numbers.size() != 0) {
-			first = new elem;
-			first->value = *numbers.begin();
-			elem* prev = first;
-			for (unsigned i = 1; i < numbers.size(); i++) {
-				curr = new elem;
-				curr->value = *(numbers.begin() + i);
-				curr->prev = prev;
-				prev->next = curr;
-				prev = curr;
-			}
-			last = prev;
-			curr = first;
-			size = numbers.size();
+	List(int* numbers, size_t count) {
+		for (unsigned i = 0; i < count; i++) {
+			push_back(numbers[i]);
 		}
 	}
 
-	// first count of int, then numbers separated by commas
-	List(size_t count, ...) {
-		if (count > 0) {
-			va_list args;
-			va_start(args, count);
+	// integers separated by commas
+	template<typename... IntList>
+	List(int first_number, IntList... numbers) {
+		construct_args(first_number, numbers...);
+	}
 
-			first = new elem;
-			first->value = va_arg(args, int);
-			elem* prev = first;
-			for (unsigned i = 1; i < count; i++) {
-				curr = new elem;
-				curr->value = va_arg(args, int);
-				curr->prev = prev;
-				prev->next = curr;
-				prev = curr;
-				curr = first;
-				size = count;
-			}
-			last = prev;
-
-			va_end(args);
-		}
+	// only one integer
+	List(int number) {
+		push_back(number);
 	}
 
 	// default constructor (empty list)
@@ -119,12 +84,12 @@ public:
 
 	// destructor
 	~List() {
-		delete first, last, curr;
+		clear();
 	}
 
 	// add element into the end of list
 	void push_back(int val) {
-		curr = new elem;
+		elem* curr = new elem;
 		curr->value = val;
 		if (size == 0) { // if list was empty
 			first = curr; // that's the only element
@@ -139,7 +104,7 @@ public:
 
 	// add element into the beginning of list
 	void push_front(int val) {
-		curr = new elem;
+		elem* curr = new elem;
 		curr->value = val;
 		if (size == 0) { // if list was empty
 			last = curr; // that's the only element
@@ -156,8 +121,15 @@ public:
 	int pop_back() {
 		require_not_empty();
 		int val = last->value;
-		last = last->prev;
-		last->next = nullptr;
+		if (size > 1) {
+			last = last->prev;
+			delete last->next;
+			last->next = nullptr;
+		}
+		else { // list has the only element
+			delete first;
+			first = nullptr;
+		}
 		size--;
 		return val;
 	}
@@ -166,8 +138,14 @@ public:
 	int pop_front() {
 		require_not_empty();
 		int val = first->value;
-		first = first->next;
-		first->prev = nullptr;
+		if (size > 1) {
+			first = first->next;
+			first->prev = nullptr;
+		}
+		else { // list has the only element
+			delete first;
+			first = nullptr;
+		}
 		size--;
 		return val;
 	}
@@ -181,33 +159,36 @@ public:
 			push_back(val);
 		}
 		else {
-			go_to_elem(index);
+			elem* curr = go_to_elem(index);
 			elem* newElem = new elem;
 			newElem->value = val;
 			newElem->prev = curr->prev;
 			newElem->next = curr;
 			curr->prev->next = newElem;
 			curr->prev = newElem;
-			curr = newElem;
 			size++;
 		}
 	}
 
 	// get element by index
 	int at(size_t index) {
-		go_to_elem(index);
+		elem* curr = go_to_elem(index);
 		return curr->value;
 	}
 
 	// get element by index and delete it
 	int remove(size_t index) {
-		require_not_empty();
-		go_to_elem(index);
+		if (index == 0) {
+			return pop_front();
+		}
+		if (index == size - 1) {
+			return pop_back();
+		}
+		elem* curr = go_to_elem(index);
 		int val = curr->value;
 		curr->prev->next = curr->next;
 		curr->next->prev = curr->prev;
 		size--;
-		curr = first;
 		return val;
 	}
 
@@ -218,15 +199,19 @@ public:
 	
 	// remove all elements
 	void clear() {
+		elem* curr = first;
+		while (curr != nullptr) {
+			elem* next = curr->next;
+			delete curr;
+			curr = next;
+		}
 		first = nullptr;
-		last = nullptr;
-		curr = nullptr;
 		size = 0;
 	}
 
 	// set value of element at specific index
 	void set(size_t index, int val) {
-		go_to_elem(index);
+		elem* curr = go_to_elem(index);
 		curr->value = val;
 	}
 
@@ -237,7 +222,7 @@ public:
 
 	// reverse the list
 	void reverse() {
-		curr = first;
+		elem* curr = first;
 		for (size_t i = 0; i < size; i++) {
 			// swap next and prev
 			elem* temp = curr->next;
