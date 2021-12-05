@@ -106,6 +106,17 @@ namespace alg1unittest
 			Assert::AreEqual("{  }", _STREAMSTR);
 		}
 
+		TEST_METHOD(function_popBack_empty)
+		{
+			List list = *new List();
+			try {
+				list.pop_back();
+			}
+			catch (exception error) {
+				Assert::AreEqual("List is empty", error.what());
+			}
+		}
+
 		TEST_METHOD(function_popFront)
 		{
 			List list(TEST_VALUES_LIST);
@@ -123,6 +134,17 @@ namespace alg1unittest
 			Assert::IsTrue(val == 1);
 			Assert::IsTrue(list.isEmpty());
 			Assert::AreEqual("{  }", _STREAMSTR);
+		}
+
+		TEST_METHOD(function_popFront_empty)
+		{
+			List list = *new List();
+			try {
+				list.pop_front();
+			}
+			catch (exception error) {
+				Assert::AreEqual("List is empty", error.what());
+			}
 		}
 
 		TEST_METHOD(function_insert_front)
@@ -156,6 +178,12 @@ namespace alg1unittest
 			int val2 = list.at(1);
 			int val3 = list.at(2);
 			Assert::IsTrue(val1 == 1 && val2 == 2 && val3 == 3);
+			try {
+				list.at(666);
+			}
+			catch (exception error) {
+				Assert::AreEqual("Index is out of range", error.what());
+			}
 		}
 
 		TEST_METHOD(function_remove)
@@ -185,6 +213,16 @@ namespace alg1unittest
 			Assert::IsTrue(val == 3);
 		}
 
+		TEST_METHOD(function_remove_outOfRange) {
+			List list(TEST_VALUES_LIST);
+			try {
+				list.remove(666);
+			}
+			catch (exception error) {
+				Assert::AreEqual("Index is out of range", error.what());
+			}
+		}
+
 		TEST_METHOD(function_clear)
 		{
 			List list(TEST_VALUES_LIST);
@@ -207,6 +245,17 @@ namespace alg1unittest
 			list.set(1, -2);
 			_STREAM << list;
 			Assert::AreEqual("{  1  -2  3  }", _STREAMSTR);
+		}
+
+		TEST_METHOD(function_set_outOfRange)
+		{
+			List list(TEST_VALUES_LIST);
+			try {
+				list.set(12, 23);
+			}
+			catch (exception error) {
+				Assert::AreEqual("Index is out of range", error.what());
+			}
 		}
 
 		TEST_METHOD(function_isEmpty_true)
